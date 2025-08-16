@@ -28,6 +28,7 @@ print("\nCadastro dos Alunos e Respostas")
 lista_alunos_respostas = [] #aqui vai receber os alunos e respostas e deixar imutavel
 
 #agora que ja pegamos o gabarito da prova vamos pegar os alunos e respostas
+#primeira funcao com closure
 def inserir_alunos_respostas(lista_alunos_respostas, total_questoes):
     nome = input("Digite o nome do aluno ou 'parar' para terminar:")
 
@@ -60,12 +61,35 @@ def inserir_alunos_respostas(lista_alunos_respostas, total_questoes):
 
 inserir_alunos_respostas(lista_alunos_respostas, total_questoes)
 
+
+valor_questao = lambda nota_maxima, total_questoes: nota_maxima / total_questoes
+
+#definir logo uma funcao pra calcular a nota pq vou passar ela na hora de avaliar
+def nota(valor_questao, acertos):
+    return valor_questao * acertos
+
+#funcao de compar respota
+def avaliar(lista_alunos_respostas, gabarito):
+
+    def avaliar_aluno(aluno):
+         #pra ficar mais claro eu vou usar um list comprehension mas como isso cria uma nova lista com acertos e uso o len() para mostrar o tamnho que é a mesma coisa que contar os acertos
+        acertos = len([i for i in range(len(gabarito)) if aluno['respostas'][i] == gabarito[i]])
+        #e aqui é a mesma coisa
+        erros = len([i for i in range(len(gabarito)) if aluno['respostas'][i] != gabarito[i]])
+        return {
+            'nome': aluno['nome'],
+            'acertos': acertos,
+            'erros': erros
+        }
+    
+    #ai quando chega aqui a gente usa um list() pra criar uma lista e o usa o map pra fazer com que a funcao avaliar_aluno rode cada interacao de lista_alunos_respostas
+    #e aqui tbm a gente ja usa alta ordem pq passa avaliar_aluno para map
+    return list(map(avaliar_aluno, lista_alunos_respostas))
+
+
+
+
 print("\nGabarito e Respostas dos Alunos:")
 print(f"Gabarito: {gabarito}")
 for aluno in lista_alunos_respostas:
     print(f"Aluno: {aluno['nome']}\nRespostas: {aluno['respostas']}")
-
-
-    
-
-
