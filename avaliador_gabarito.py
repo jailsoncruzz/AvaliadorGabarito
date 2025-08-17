@@ -65,7 +65,7 @@ inserir_alunos_respostas(lista_alunos_respostas, total_questoes)
 valor_questao = lambda nota_maxima, total_questoes: nota_maxima / total_questoes
 
 #definir logo uma funcao pra calcular a nota pq vou passar ela na hora de avaliar
-def nota(valor_questao, acertos):
+def calcular_nota(valor_questao, acertos):
     return valor_questao * acertos
 
 #funcao de compar respota
@@ -87,9 +87,53 @@ def avaliar(lista_alunos_respostas, gabarito):
     return list(map(avaliar_aluno, lista_alunos_respostas))
 
 
+avaliacoes = avaliar(lista_alunos_respostas, gabarito)
 
 
-print("\nGabarito e Respostas dos Alunos:")
-print(f"Gabarito: {gabarito}")
-for aluno in lista_alunos_respostas:
-    print(f"Aluno: {aluno['nome']}\nRespostas: {aluno['respostas']}")
+
+#aqui é o final já uma funcao geral pra mostrar os resultados
+def resultado_final():
+    #usando a funcao lmbda
+    valor_q = valor_questao(nota_maxima, total_questoes)
+
+
+    #aqui uma recursao para mostrar cada aluno sem usar loop
+    def mostrar_resultado(i=0):
+        if i >= len(avaliacoes):
+            return
+        
+        aluno_avaliado = avaliacoes[i]
+        aluno_respostas = lista_alunos_respostas[i]['respostas']
+        
+        #chama o calculo da nota
+        nota_aluno = calcular_nota(valor_q, aluno_avaliado['acertos'])
+
+        print("_________________")
+        print(f"\nNome do Aluno: {aluno_avaliado['nome']}")
+
+        #agora aqui já é outra recursao mas pra mostrar a respostas do aluno atual
+        def mostrar_respostas(j=0):
+            if j >= total_questoes:
+                return
+            
+            
+            print(f"\nQuestão {j+1}:")
+            print(f"Resposta do aluno: {aluno_respostas[j]}")
+            print(f"Resposta correta: {gabarito[j]}")
+
+    
+            mostrar_respostas(j + 1)
+            
+        #aqui comeca mostrar as respostas
+        mostrar_respostas()
+        
+        print(f"\nAcertos: {aluno_avaliado['acertos']}")
+        print(f"Erros: {aluno_avaliado['erros']}")
+        print(f"Nota final: {nota_aluno}")
+
+        mostrar_resultado(i + 1)
+
+    #aqui comeca a funcao de mostrar o resultado
+    mostrar_resultado()
+
+resultado_final()
