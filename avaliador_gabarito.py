@@ -1,8 +1,32 @@
 print("Corretor de Gabarito\n")
 print("Cadastro da Prova")
 
-total_questoes = int(input("Quantas questões tem a prova? "))
-nota_maxima = float(input("Quanto vale a prova? "))
+
+class IO:
+    def __init__(self, effect):
+        self.effect = effect  # efeito colateral adiado (função sem executar ainda)
+
+    def run(self):
+        return self.effect()  # executa quando chamado explicitamente
+
+    def map(self, f):
+        return IO(lambda: f(self.run()))  # aplica função sobre o resultado
+
+    def flat_map(self, f):
+        return IO(lambda: f(self.run()).run())  # encadeia IOs
+    
+# --- Encapsulando entrada de dados ---
+def get_input(mensagem):
+    return IO(lambda: input(mensagem))  # só executa quando .run() for chamado
+
+# Uso da monad para encapsular input inicial
+total_questoes = get_input("Quantas questões tem a prova? ") \
+    .map(int) \
+    .run()
+
+nota_maxima = get_input("Quanto vale a prova? ") \
+    .map(float) \
+    .run()
 
 print("\n Digite a reposta correta para cada questão (A, B, C, D, E):")
 
@@ -11,7 +35,11 @@ gabarito = [] #aqui vai receber o gabarito e deixar imutavel
 def inserir_gabarito(questao, total_questoes, gabarito):
     if questao > total_questoes:
         return
-    resposta = input(f"Questão {questao}: ")
+    
+    resposta = get_input(f"Questão {questao}: ") \
+        .map(lambda r: r.strip().upper()) \
+        .run()
+        
     #vou usar strip para tirar espaco e upper pra deixar maiusculo logo, assim fica mais facil comparar
     gabarito.append(resposta.strip().upper())
     inserir_gabarito(questao + 1, total_questoes, gabarito)
@@ -30,7 +58,9 @@ lista_alunos_respostas = [] #aqui vai receber os alunos e respostas e deixar imu
 #agora que ja pegamos o gabarito da prova vamos pegar os alunos e respostas
 #primeira funcao com closure
 def inserir_alunos_respostas(lista_alunos_respostas, total_questoes):
-    nome = input("Digite o nome do aluno ou 'parar' para terminar:")
+    nome = get_input("Digite o nome do aluno ou 'parar' para terminar: ") \
+        .map(lambda x: x.strip()) \
+        .run()
 
     #remove logo os espcos e deixa minusculo
     if nome.strip().lower() == 'parar':
@@ -45,7 +75,9 @@ def inserir_alunos_respostas(lista_alunos_respostas, total_questoes):
     def inserir_respostas(questao_atual, total_questoes, respostas):
         if questao_atual > total_questoes:
             return
-        reposta_aluno = input(f"Questão {questao_atual}: ")
+        reposta_aluno = get_input(f"Questão {questao_atual}: ") \
+            .map(lambda r: r.strip().upper()) \
+            .run()
         respostas.append(reposta_aluno.strip().upper())
         inserir_respostas(questao_atual + 1, total_questoes, respostas)
 
